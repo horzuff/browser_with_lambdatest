@@ -1,0 +1,2 @@
+--removekeywords    name:Capability
+--removekeywords    name:Connect_To_Browser

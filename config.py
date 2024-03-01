@@ -13,7 +13,7 @@ except Exception:
 
 
 @keyword("Capability")
-def caps():
+def caps(user: str, access_key: str) -> str:
   a = {
       'browserName': 'pw-webkit',
       'browserVersion': 'latest',
@@ -23,8 +23,8 @@ def caps():
         'build': 'browser-library tests',
         'name': 'browser-library',
         #provide Your username and access key
-        'user': 'username',
-        'accessKey': 'accesskey',
+        'user': user,
+        'accessKey': access_key,
       }
     }
 

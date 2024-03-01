@@ -3,59 +3,82 @@ Library    Browser
 Library    config.py    AS    LTConfig
 Library    String
 Library    OperatingSystem
+Variables    creds.py
 
 Suite Setup    Suite setup keyword
 
-*** Variables ***
-
-${search locator}    xpath=//textarea
-${search result locator}    xpath=//div[@class="b_title"]//a[text()="Print and Packaging Solutions | HEIDELBERG"]
-${continue without cookies locator}    css=div[id=uc-cnil-deny-all]
-
-${upload file}    .${/}test_file.txt
-${file upload locator}    //input[@type="file" and @name="files[]"]
-
-${download file button}    //a[@role="button" and @class="mw-mmv-download-button"]
-${size selection dropdown}    span.mw-ui-button.mw-ui-progressive.mw-mmv-download-select-menu
-${small size option}    //span[text()="Small "]
-${download file}    ${OUTPUT DIR}${/}myw3schoolsimage.jpg
-${file download locator}    //a[@download and @href]
 
 *** Test Cases ***
 
-File up- and download
-    Open file upload mock
-    Test uploading file
-    Browser.Close Page
-    Open file download mock
-    Test downloading file
-    Browser.Close Browser
+File downloading test
+    Browser.New Page    https://the-internet.herokuapp.com/download 
+    ${status}=    BuiltIn.Run Keyword and Return Status    Download by href
+    BuiltIn.Should Not Be True    ${status}
+    ${status}=    BuiltIn.Run Keyword and Return Status    Download with saveAs
+    BuiltIn.Should Be True    ${status}
+    ${status}=    BuiltIn.Run Keyword and Return Status    Download with promise
+    BuiltIn.Should Not Be True    ${status}
+    ${status}=    BuiltIn.Run Keyword and Return Status    Download with promise and saveas
+    BuiltIn.Should Be True    ${status}
 
+File uploading test
+    Browser.New Page    https://the-internet.herokuapp.com/upload
+    Upload to input
+    Upload with promise
+    
 *** Keywords ***
+
 Suite setup keyword
     [Documentation]    suite setup
-    ${remote capabilities}=    LTConfig.Capability
+    ${remote capabilities}=    LTConfig.Capability    ${LTuser}    ${LTkey}
     Browser.Connect To Browser    wss://cdp.lambdatest.com/playwright?capabilities=${remote capabilities}
     Browser.New Context    viewport={'width': 1920, 'height': 1080}
 
-Open file upload mock
-    Browser.New Page    url=https://blueimp.github.io/jQuery-File-Upload/
+Download by href
+    @{downloads}=    Browser.Get Elements    xpath=//div[@class="example"]//a[text()]
+    ${href}=    Browser.Get Property    ${downloads}[0]    href
+    ${file}=    Browser.Download    href=${href}
+    ${actual_size}=    Get File Size    ${file.saveAs}
 
-Test uploading file
-    ${promise}=    Browser.Promise To Upload File    ${upload file}
-    Browser.Click    ${file upload locator}
-    Browser.Wait For    ${promise}
+Download with saveAs
+    @{downloads}=    Browser.Get Elements    xpath=//div[@class="example"]//a[text()]
+    ${href}=    Browser.Get Property    ${downloads}[1]    href
+    ${filename}=    Browser.Get Text    ${downloads}[1]
+    ${file}=    Browser.Download    ${href}    saveAs=${OUTPUT_DIR}${/}${filename}
+    OperatingSystem.File Should Exist    ${OUTPUT_DIR}${/}${filename}
+    OperatingSystem.File Should Not Be Empty    ${OUTPUT_DIR}${/}${filename}
+    VAR    ${test file}    ${OUTPUT_DIR}${/}${filename}    scope=SUITE
 
-Open file download mock
-    Browser.New Page    url=https://en.wikipedia.org/wiki/Bun#/media/File:Sesame_seed_hamburger_buns.jpg
-    
+Download with promise
+    @{downloads}=    Browser.Get Elements    xpath=//div[@class="example"]//a[text()]
+    ${href}=    Browser.Get Property    ${downloads}[2]    href
+    ${filename}=    Browser.Get Text    ${downloads}[2]
+    ${download promise}=    Browser.Promise To Wait For Download
+    Browser.Click    ${downloads}[2]
+    ${file}=    Browser.Wait For    ${download promise}
+    OperatingSystem.File Should Exist      ${file.saveAs}
+    Should Be True    '${file.suggestedFilename}' != ${None}
 
-Test downloading file
-    ${promise}=    Browser.Promise To Wait For Download
-    Browser.Click    xpath=${download file button}
-    Browser.Click    css=${size selection dropdown}
-    Browser.Click    xpath=${small size option}
-    Browser.Click    xpath=${file download locator}
-    ${file_obj}=    Wait For    ${promise}
-    OperatingSystem.File Should Exist    ${file_obj}[saveAs]
-    Should Be True       ${file_obj.suggestedFilename}
+Download with promise and saveas
+    @{downloads}=    Browser.Get Elements    xpath=//div[@class="example"]//a[text()]
+    ${href}=    Browser.Get Property    ${downloads}[3]    href
+    ${filename}=    Browser.Get Text    ${downloads}[3]
+    ${download promise}=    Browser.Promise To Wait For Download    ${OUTPUT_DIR}${/}${filename}
+    Browser.Click    ${downloads}[3]
+    ${file}=    Browser.Wait For    ${download promise}
+    OperatingSystem.File Should Exist    ${OUTPUT_DIR}${/}${filename}
+    OperatingSystem.File Should Not Be Empty    ${OUTPUT_DIR}${/}${filename}
+
+Upload to input
+    Browser.Upload File By Selector    id=file-upload    ${test file}
+    Browser.Click    id=file-submit
+    Browser.Wait For Elements State    id=uploaded-files    visible
+    Browser.Go Back
+
+Upload with promise
+    ${upload promise}=    Browser.Promise To Upload File    ${test file}
+    Browser.Click    id=file-upload
+    ${upload result}=    Browser.Wait For    ${upload promise}
+    Browser.Click    id=file-submit
+    Browser.Wait For Elements State    id=uploaded-files    visible
+    Browser.Go Back

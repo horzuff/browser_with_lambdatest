@@ -1,3 +1,5 @@
-env_vars.txt
-venv
+creds.py
+results
+results/*
+.venv
 __pycache__

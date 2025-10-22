@@ -1,7 +1,7 @@
 *** Settings ***
-Library    Browser
-Library    String
-Library    OperatingSystem
+Library        Browser
+Library        String
+Library        OperatingSystem
 
 Suite Setup    Suite setup keyword
 

@@ -1,9 +1,9 @@
 *** Settings ***
-Library    Browser
-Library    config.py    AS    LTConfig
-Library    String
-Library    OperatingSystem
-Variables    creds.py
+Library        Browser
+Library        config.py    AS    LTConfig
+Library        String
+Library        OperatingSystem
+Variables      creds/creds.py
 
 Suite Setup    Suite setup keyword
 

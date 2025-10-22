@@ -1,2 +1,4 @@
---removekeywords    name:Capability
---removekeywords    name:Connect_To_Browser
+--removekeywords name:Capability
+--removekeywords name:Connect_To_Browser
+--loglevel TRACE
+--outputdir results

@@ -15,11 +15,11 @@ except Exception:
 @keyword("Capability")
 def caps(user: str, access_key: str) -> str:
   a = {
-      'browserName': 'pw-webkit',
+      'browserName': 'chrome',
       'browserVersion': 'latest',
       #lambdatest specific options
       'LT:Options': {
-        'platform': 'macOS Monterey',
+        'platform': 'windows 11',
         'build': 'browser-library tests',
         'name': 'browser-library',
         #provide Your username and access key

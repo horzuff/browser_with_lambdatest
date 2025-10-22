@@ -30,8 +30,10 @@ File uploading test
 
 Suite setup keyword
     [Documentation]    suite setup
+    ${loglevel}=    BuiltIn.Set Log Level    NONE
     ${remote capabilities}=    LTConfig.Capability    ${LTuser}    ${LTkey}
     Browser.Connect To Browser    wss://cdp.lambdatest.com/playwright?capabilities=${remote capabilities}
+    BuiltIn.Set Log Level    ${loglevel}
     Browser.New Context    viewport={'width': 1920, 'height': 1080}
 
 Download by href

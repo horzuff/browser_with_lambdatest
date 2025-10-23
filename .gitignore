@@ -3,3 +3,4 @@ results
 results/*
 .venv
 __pycache__
+creds/
